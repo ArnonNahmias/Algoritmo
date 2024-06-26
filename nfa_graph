@@ -1,0 +1,14 @@
+digraph {
+	0 [fillcolor=lightblue penwidth=2.0 shape=circle style=filled]
+	1 [fillcolor=lightblue shape=circle style=filled]
+	2 [fillcolor=lightblue shape=circle style=filled]
+	3 [fillcolor=lightblue shape=circle style=filled]
+	4 [fillcolor=lightblue shape=circle style=filled]
+	5 [fillcolor=lightblue shape=doublecircle style=filled]
+	0 -> 1 [label=a]
+	1 -> 5 [label="ε"]
+	2 -> 3 [label=b]
+	3 -> 5 [label="ε"]
+	4 -> 0 [label="ε"]
+	4 -> 2 [label="ε"]
+}

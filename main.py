@@ -1,15 +1,16 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
-
+from networkx.drawing.nx_agraph import to_agraph
+import graphviz as gv
 
 class ThompsonConstructor:
     def __init__(self):
         self.state_count = 0
 
     def new_state(self):
+        state_label = str(self.state_count)  # Modified state label format
         self.state_count += 1
-        return self.state_count
+        return state_label
 
     def regex_to_nfa(self, regex):
         stack = []
@@ -59,7 +60,7 @@ class ThompsonConstructor:
         for char in regex:
             if char.isalpha():
                 start = self.new_state()
-                end = self.new_state()
+                end = self.new_state()  # Estado de aceptación
                 graph = nx.DiGraph()
                 graph.add_edge(start, end, label=char)
                 operands_stack.append((start, end, graph))
@@ -80,35 +81,28 @@ class ThompsonConstructor:
             apply_operator(operators_stack, operands_stack)
 
         start, end, graph = operands_stack.pop()
-        return graph, start, end
+        return graph, '0', str(self.state_count - 1)
 
     def draw_nfa(self, graph, start, end):
-        pos = graphviz_layout(graph, prog='dot')
-        labels = nx.get_edge_attributes(graph, 'label')
+        dot = gv.Digraph(engine='neato')
 
-        # Dibujar los nodos
-        nx.draw_networkx_nodes(graph, pos, nodelist=graph.nodes(), node_color='lightblue', node_size=500)
+        for node in graph.nodes():
+            node_label = node
+            if node == start:
+                dot.node(node_label, shape='circle', style='filled', fillcolor='lightblue', penwidth='2.0')  # Increased penwidth for start state
+            elif node == end:
+                dot.node(node_label, shape='doublecircle', style='filled', fillcolor='lightblue')
+            else:
+                dot.node(node_label, shape='circle', style='filled', fillcolor='lightblue')
 
-        # Resaltar el estado inicial
-        nx.draw_networkx_nodes(graph, pos, nodelist=[start], node_color='green', node_size=700)
+        for edge in graph.edges(data=True):
+            dot.edge(edge[0], edge[1], label=edge[2]['label'])
 
-        # Resaltar el estado final
-        nx.draw_networkx_nodes(graph, pos, nodelist=[end], node_color='red', node_size=700)
-
-        # Dibujar las aristas
-        nx.draw_networkx_edges(graph, pos, edgelist=graph.edges(), edge_color='black')
-
-        # Dibujar las etiquetas de los nodos
-        nx.draw_networkx_labels(graph, pos)
-
-        # Dibujar las etiquetas de las aristas
-        nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
-
-        plt.show()
-
+        dot.render('nfa_graph', format='png', cleanup=True)
+        dot.view()
 
 # Ejemplo de uso
-regex = "(ab+ba)*"
+regex = "a+b"
 constructor = ThompsonConstructor()
 nfa_graph, start_state, end_state = constructor.regex_to_nfa(regex)
 constructor.draw_nfa(nfa_graph, start_state, end_state)
