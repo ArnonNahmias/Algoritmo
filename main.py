@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import to_agraph
 import graphviz as gv
 
 class ThompsonConstructor:
@@ -8,7 +7,7 @@ class ThompsonConstructor:
         self.state_count = 0
 
     def new_state(self):
-        state_label = str(self.state_count)  # Modified state label format
+        state_label = str(self.state_count)
         self.state_count += 1
         return state_label
 
@@ -60,7 +59,7 @@ class ThompsonConstructor:
         for char in regex:
             if char.isalpha():
                 start = self.new_state()
-                end = self.new_state()  # Estado de aceptación
+                end = self.new_state()
                 graph = nx.DiGraph()
                 graph.add_edge(start, end, label=char)
                 operands_stack.append((start, end, graph))
@@ -70,7 +69,7 @@ class ThompsonConstructor:
                 elif char == ')':
                     while operators_stack and operators_stack[-1] != '(':
                         apply_operator(operators_stack, operands_stack)
-                    operators_stack.pop()  # Remove '(' from stack
+                    operators_stack.pop()
                 else:
                     while (operators_stack and operators_stack[-1] != '(' and
                            higher_precedence(operators_stack[-1], char)):
@@ -81,16 +80,16 @@ class ThompsonConstructor:
             apply_operator(operators_stack, operands_stack)
 
         start, end, graph = operands_stack.pop()
-        return graph, '0', str(self.state_count - 1)
+        return graph, start, end
 
-    def draw_nfa(self, graph, start, end):
+    def draw_automaton(self, graph, start, ends, filename):
         dot = gv.Digraph(engine='neato')
 
         for node in graph.nodes():
             node_label = node
             if node == start:
-                dot.node(node_label, shape='circle', style='filled', fillcolor='lightblue', penwidth='2.0')  # Increased penwidth for start state
-            elif node == end:
+                dot.node(node_label, shape='circle', style='filled', fillcolor='lightblue', penwidth='2.0')
+            elif node in ends:
                 dot.node(node_label, shape='doublecircle', style='filled', fillcolor='lightblue')
             else:
                 dot.node(node_label, shape='circle', style='filled', fillcolor='lightblue')
@@ -98,11 +97,14 @@ class ThompsonConstructor:
         for edge in graph.edges(data=True):
             dot.edge(edge[0], edge[1], label=edge[2]['label'])
 
-        dot.render('nfa_graph', format='png', cleanup=True)
+        dot.render(filename, format='png', cleanup=True)
         dot.view()
 
+
 # Ejemplo de uso
-regex = "a+b"
+regex = "(a.b + b.a)*"
 constructor = ThompsonConstructor()
 nfa_graph, start_state, end_state = constructor.regex_to_nfa(regex)
-constructor.draw_nfa(nfa_graph, start_state, end_state)
+constructor.draw_automaton(nfa_graph, start_state, {end_state}, 'nfa_graph')
+
+# Comentario: Omitir la determinización del NFA para evitar problemas
