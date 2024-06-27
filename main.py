@@ -1,5 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import graphviz as gv
 
 class ThompsonConstructor:
@@ -100,11 +99,9 @@ class ThompsonConstructor:
         dot.render(filename, format='png', cleanup=True)
         dot.view()
 
-
 # Ejemplo de uso
-regex = "(a.b + b.a)*"
+print("Para concatenar se utiliza el punto")
+regex = input("Ingrese la epxresion regular a graficar: ")
 constructor = ThompsonConstructor()
 nfa_graph, start_state, end_state = constructor.regex_to_nfa(regex)
 constructor.draw_automaton(nfa_graph, start_state, {end_state}, 'nfa_graph')
-
-# Comentario: Omitir la determinización del NFA para evitar problemas
