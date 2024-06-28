@@ -1,7 +1,7 @@
 import networkx as nx
 import graphviz as gv
 
-class ThompsonConstructor:
+class NFAConstructor:
     def __init__(self):
         self.state_count = 0
 
@@ -10,7 +10,7 @@ class ThompsonConstructor:
         self.state_count += 1
         return state_label
 
-    def regex_to_nfa(self, regex):
+    def regex_to_nfa(self, expresionReg):
         stack = []
         operators = set(['*', '+', '.', '(', ')'])
         precedence = {'*': 3, '.': 2, '+': 1}
@@ -67,9 +67,11 @@ class ThompsonConstructor:
             new_regex.append(regex[-1])
             return ''.join(new_regex)
 
-        regex = add_concatenation(regex)
+        regex = add_concatenation(expresionReg)
 
-        for char in regex:
+        i = 0
+        while i < len(regex):
+            char = regex[i]
             if char not in operators:
                 start = self.new_state()
                 end = self.new_state()
@@ -88,6 +90,7 @@ class ThompsonConstructor:
                            higher_precedence(operators_stack[-1], char)):
                         apply_operator(operators_stack, operands_stack)
                     operators_stack.append(char)
+            i += 1
 
         while operators_stack:
             apply_operator(operators_stack, operands_stack)
@@ -131,6 +134,6 @@ print("7. (a+b).a.b => 'a' o 'b' concatenado con 'a' y luego con 'b'")
 print("===============================================")
 
 regex = input("Ingrese la expresión regular a graficar: ")
-constructor = ThompsonConstructor()
+constructor = NFAConstructor()
 nfa_graph, start_state, end_state = constructor.regex_to_nfa(regex)
 constructor.draw_automaton(nfa_graph, start_state, {end_state}, 'nfa_graph')
